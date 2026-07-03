@@ -1,0 +1,195 @@
+.public-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Brilho esférico de fundo animado */
+.glow-bg {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  filter: blur(50px);
+  pointer-events: none;
+  animation: float-glow 8s ease-in-out infinite alternate;
+}
+
+@keyframes float-glow {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+}
+
+.public-card {
+  width: 100%;
+  max-width: 480px;
+  padding: 48px 40px;
+  text-align: center;
+  position: relative;
+}
+
+.gym-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #ffffff 60%, var(--accent-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Badge de Lotação Em Tempo Real */
+.status-indicator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  transition: var(--transition-smooth);
+}
+
+.status-indicator-badge.status-green {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--status-green);
+  border-color: rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.1);
+}
+.status-indicator-badge.status-green .pulse-dot { background-color: var(--status-green); }
+.status-indicator-badge.status-green .pulse-dot::after { box-shadow: 0 0 0 0 var(--status-green-glow); }
+
+.status-indicator-badge.status-yellow {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--status-yellow);
+  border-color: rgba(245, 158, 11, 0.2);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.1);
+}
+.status-indicator-badge.status-yellow .pulse-dot { background-color: var(--status-yellow); }
+.status-indicator-badge.status-yellow .pulse-dot::after { box-shadow: 0 0 0 0 var(--status-yellow-glow); }
+
+.status-indicator-badge.status-red {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--status-red);
+  border-color: rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.1);
+}
+.status-indicator-badge.status-red .pulse-dot { background-color: var(--status-red); }
+.status-indicator-badge.status-red .pulse-dot::after { box-shadow: 0 0 0 0 var(--status-red-glow); }
+
+.status-indicator-badge.status-closed {
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--text-secondary);
+  border-color: rgba(100, 116, 139, 0.2);
+}
+.status-indicator-badge.status-closed .pulse-dot { background-color: var(--text-muted); }
+
+/* Bloco principal de ocupação */
+.occupancy-gauge-container {
+  margin-bottom: 40px;
+}
+
+.gauge-value {
+  font-size: 7rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -2px;
+  background: linear-gradient(180deg, #ffffff 60%, rgba(255, 255, 255, 0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: var(--transition-smooth);
+}
+
+.gauge-label {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+/* Barra de capacidade horizontal clean */
+.capacity-bar-wrapper {
+  width: 100%;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.capacity-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s ease;
+}
+
+.capacity-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.operational-hours {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.operational-hours.open { color: var(--status-green); }
+.operational-hours.closed { color: var(--text-muted); }
+
+.public-footer {
+  margin-top: 32px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.public-footer svg {
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.6; }
+}
+
+.error-view {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.error-view h2 { font-size: 1.5rem; color: var(--status-red); }
+
+.loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}

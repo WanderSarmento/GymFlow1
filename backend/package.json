@@ -1,0 +1,32 @@
+{
+  "name": "gymflow-backend",
+  "version": "1.0.0",
+  "description": "Backend for GymFlow SaaS occupancy tracker",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "prisma:generate": "npx prisma generate",
+    "prisma:db-push": "npx prisma db push",
+    "prisma:seed": "node prisma/seed.js",
+    "serial": "node src/serialListener.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.14.0",
+    "@serialport/parser-readline": "^13.0.0",
+    "@supabase/supabase-js": "^2.108.2",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.1.1",
+    "pg": "^8.21.0",
+    "serialport": "^13.0.0",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "prisma": "^5.14.0"
+  }
+}

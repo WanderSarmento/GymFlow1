@@ -1,0 +1,42 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("STAFF") // "OWNER" | "STAFF"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Gym {
+  id               String          @id @default(uuid())
+  name             String
+  slug             String          @unique
+  capacity         Int             @default(100)
+  currentOccupancy Int             @default(0)
+  isOpen           Boolean         @default(true)
+  businessHours    String          @default("Seg a Sex: 06h às 22h | Sáb: 08h às 14h")
+  address          String?
+  logoUrl          String?
+  primaryColor     String          @default("#7C3AED")
+  backgroundColor  String          @default("#09090b")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model OccupancyLog {
+  id        String   @id @default(uuid())
+  occupancy Int
+  timestamp DateTime @default(now())
+}
+
