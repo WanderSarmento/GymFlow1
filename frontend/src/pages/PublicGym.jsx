@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import io from 'socket.io-client';
+import { useRealtimeGym } from '../hooks/useRealtimeGym';
 import Chart from '../components/Chart';
 import '../styles/global.css';
 import '../styles/public.css';
 
 export default function PublicGym() {
   const { slug } = useParams();
-  const [gym, setGym] = useState(null);
+  const [initialGymData, setInitialGymData] = useState(null);
   const [peakHours, setPeakHours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,7 +34,7 @@ export default function PublicGym() {
           throw new Error(data.error || 'Erro ao carregar dados da academia.');
         }
         const data = await res.json();
-        setGym(data);
+        setInitialGymData(data);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -44,47 +44,18 @@ export default function PublicGym() {
 
     loadGym();
     loadPeakHours();
-
-    // 2. Conecta ao WebSocket para atualizações em tempo real
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
-    const socket = io(backendUrl);
-    
-    socket.emit('join_gym', slug);
-
-    socket.on('occupancy_update', (data) => {
-      if (data.slug === slug) {
-        setGym(prev => prev ? { 
-          ...prev, 
-          currentOccupancy: data.currentOccupancy,
-          capacity: data.capacity,
-          isOpen: data.isOpen,
-          status: data.status,
-          address: data.address !== undefined ? data.address : prev.address,
-          logoUrl: data.logoUrl !== undefined ? data.logoUrl : prev.logoUrl,
-          primaryColor: data.primaryColor !== undefined ? data.primaryColor : prev.primaryColor,
-          backgroundColor: data.backgroundColor !== undefined ? data.backgroundColor : prev.backgroundColor
-        } : null);
-        // Atualiza os picos históricos em segundo plano se houver novas atualizações
-        loadPeakHours();
-      }
-    });
-
-    socket.on('gym_status_changed', (data) => {
-      if (data.slug === slug) {
-        if (data.status === 'SUSPENDED') {
-          setError('Esta academia está temporariamente suspensa.');
-        } else {
-          // Recarrega
-          loadGym();
-          loadPeakHours();
-        }
-      }
-    });
-
-    return () => {
-      socket.disconnect();
-    };
   }, [slug]);
+
+  // Utiliza o hook do Supabase Realtime para obter atualizações em tempo real
+  const [gym, setGym] = useRealtimeGym({ slug }, initialGymData);
+
+  // Recarrega os picos de horário se a ocupação mudar (tempo real)
+  useEffect(() => {
+    if (gym) {
+      loadPeakHours();
+    }
+  }, [gym?.currentOccupancy]);
+
 
   if (loading) {
     return (

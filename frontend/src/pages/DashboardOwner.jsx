@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
+import { useRealtimeGym } from '../hooks/useRealtimeGym';
 import Navbar from '../components/Navbar';
 import Chart from '../components/Chart';
 import DashboardVisualSettings from '../components/DashboardVisualSettings';
@@ -9,7 +9,7 @@ import '../styles/dashboard.css';
 
 export default function DashboardOwner() {
   const { user, updateUserGym } = useAuth();
-  const [gym, setGym] = useState(user?.gym || null);
+  const [initialGymData, setInitialGymData] = useState(user?.gym || null);
   const [peakHours, setPeakHours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,7 +37,7 @@ export default function DashboardOwner() {
       });
       if (!res.ok) throw new Error('Não foi possível carregar as informações da academia.');
       const data = await res.json();
-      setGym(data);
+      setInitialGymData(data);
       setGymName(data.name);
       setCapacity(data.capacity);
       setIsOpen(data.isOpen);
@@ -75,39 +75,21 @@ export default function DashboardOwner() {
     initialize();
   }, []);
 
-  // Socket.io para atualizações em tempo real
+  // Utiliza o hook do Supabase Realtime para obter atualizações em tempo real da academia
+  const [gym, setGym] = useRealtimeGym({ id: initialGymData?.id }, initialGymData);
+
+  // Mantém os campos de formulário e dados em sincronia com o tempo real
   useEffect(() => {
-    if (!gym?.id) return;
-
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
-    const socket = io(backendUrl);
-    socket.emit('join_gym', gym.id);
-
-    socket.on('occupancy_update', (data) => {
-      if (data.gymId === gym.id) {
-        setGym(prev => prev ? { 
-          ...prev, 
-          currentOccupancy: data.currentOccupancy,
-          capacity: data.capacity,
-          isOpen: data.isOpen,
-          businessHours: data.businessHours || prev.businessHours,
-          address: data.address !== undefined ? data.address : prev.address
-        } : null);
-        if (data.businessHours !== undefined) {
-          setBusinessHours(data.businessHours);
-        }
-        if (data.address !== undefined) {
-          setAddress(data.address || '');
-        }
-        // Atualiza os dados de horários de pico silenciosamente em novas atualizações
-        fetchPeakData();
-      }
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [gym?.id]);
+    if (gym) {
+      setGymName(gym.name);
+      setCapacity(gym.capacity);
+      setIsOpen(gym.isOpen);
+      setBusinessHours(gym.businessHours || '');
+      setAddress(gym.address || '');
+      updateUserGym(gym);
+      fetchPeakData();
+    }
+  }, [gym?.currentOccupancy, gym?.capacity, gym?.isOpen, gym?.name, gym?.businessHours, gym?.address]);
 
   // Salva configurações da academia
   const handleSaveSettings = async (e) => {

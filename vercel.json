@@ -14,7 +14,6 @@
   },
   "rewrites": [
     { "source": "/api/(.*)", "destination": { "service": "backend" } },
-    { "source": "/socket.io/(.*)", "destination": { "service": "backend" } },
     { "source": "/(.*)", "destination": { "service": "frontend" } }
   ]
 }

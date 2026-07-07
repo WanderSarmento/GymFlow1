@@ -1,5 +1,4 @@
 const { prisma } = require('../services/prisma.service');
-const { getIo } = require('../services/socket.service');
 
 async function updateOccupancy(req, res) {
   const { action } = req.body;
@@ -34,20 +33,6 @@ async function updateOccupancy(req, res) {
         occupancy: newOccupancy
       }
     });
-
-    // Dispara a atualização em tempo real via WebSocket
-    const io = getIo();
-    const payload = {
-      gymId: updatedGym.id,
-      slug: updatedGym.slug,
-      name: updatedGym.name,
-      currentOccupancy: newOccupancy,
-      capacity: updatedGym.capacity,
-      isOpen: updatedGym.isOpen
-    };
-
-    io.to(`gym:${updatedGym.id}`).emit('occupancy_update', payload);
-    io.to(`gym:${updatedGym.slug}`).emit('occupancy_update', payload);
 
     return res.status(200).json({
       success: true,

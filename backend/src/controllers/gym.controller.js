@@ -1,5 +1,4 @@
 const { prisma } = require('../services/prisma.service');
-const { getIo } = require('../services/socket.service');
 
 // Retorna detalhes da academia para visualização pública (busca por slug)
 async function getPublicGym(req, res) {
@@ -79,22 +78,6 @@ async function updateGymSettings(req, res) {
         data: { occupancy: 0 }
       });
     }
-
-    // Emite no socket em tempo real
-    const io = getIo();
-    const payload = {
-      gymId: updatedGym.id,
-      slug: updatedGym.slug,
-      name: updatedGym.name,
-      currentOccupancy: updatedGym.currentOccupancy,
-      capacity: updatedGym.capacity,
-      isOpen: updatedGym.isOpen,
-      businessHours: updatedGym.businessHours,
-      address: updatedGym.address
-    };
-
-    io.to(`gym:${updatedGym.id}`).emit('occupancy_update', payload);
-    io.to(`gym:${updatedGym.slug}`).emit('occupancy_update', payload);
 
     return res.status(200).json(updatedGym);
   } catch (error) {
@@ -233,24 +216,6 @@ async function updateGymVisuals(req, res) {
       where: { id: gym.id },
       data: updateData
     });
-
-    // Emite no socket em tempo real para atualizar o visual instantaneamente na tela pública
-    const io = getIo();
-    const payload = {
-      gymId: updatedGym.id,
-      slug: updatedGym.slug,
-      name: updatedGym.name,
-      currentOccupancy: updatedGym.currentOccupancy,
-      capacity: updatedGym.capacity,
-      isOpen: updatedGym.isOpen,
-      businessHours: updatedGym.businessHours,
-      logoUrl: updatedGym.logoUrl,
-      primaryColor: updatedGym.primaryColor,
-      backgroundColor: updatedGym.backgroundColor
-    };
-
-    io.to(`gym:${updatedGym.id}`).emit('occupancy_update', payload);
-    io.to(`gym:${updatedGym.slug}`).emit('occupancy_update', payload);
 
     return res.status(200).json(updatedGym);
   } catch (error) {

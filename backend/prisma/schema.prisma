@@ -1,11 +1,11 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 model User {
@@ -13,25 +13,25 @@ model User {
   email        String   @unique
   passwordHash String
   name         String
-  role         String   @default("STAFF") // "OWNER" | "STAFF"
+  role         String   @default("STAFF")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
 model Gym {
-  id               String          @id @default(uuid())
+  id               String   @id @default(uuid())
   name             String
-  slug             String          @unique
-  capacity         Int             @default(100)
-  currentOccupancy Int             @default(0)
-  isOpen           Boolean         @default(true)
-  businessHours    String          @default("Seg a Sex: 06h às 22h | Sáb: 08h às 14h")
+  slug             String   @unique
+  capacity         Int      @default(100)
+  currentOccupancy Int      @default(0)
+  isOpen           Boolean  @default(true)
+  businessHours    String   @default("Seg a Sex: 06h às 22h | Sáb: 08h às 14h")
   address          String?
   logoUrl          String?
-  primaryColor     String          @default("#7C3AED")
-  backgroundColor  String          @default("#09090b")
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  primaryColor     String   @default("#7C3AED")
+  backgroundColor  String   @default("#09090b")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model OccupancyLog {
@@ -39,4 +39,3 @@ model OccupancyLog {
   occupancy Int
   timestamp DateTime @default(now())
 }
-
