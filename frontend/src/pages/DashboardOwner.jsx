@@ -84,24 +84,22 @@ export default function DashboardOwner() {
     socket.emit('join_gym', gym.id);
 
     socket.on('occupancy_update', (data) => {
-      if (data.gymId === gym.id) {
-        setGym(prev => prev ? { 
-          ...prev, 
-          currentOccupancy: data.currentOccupancy,
-          capacity: data.capacity,
-          isOpen: data.isOpen,
-          businessHours: data.businessHours || prev.businessHours,
-          address: data.address !== undefined ? data.address : prev.address
-        } : null);
-        if (data.businessHours !== undefined) {
-          setBusinessHours(data.businessHours);
-        }
-        if (data.address !== undefined) {
-          setAddress(data.address || '');
-        }
-        // Atualiza os dados de horários de pico silenciosamente em novas atualizações
-        fetchPeakData();
+      setGym(prev => prev ? { 
+        ...prev, 
+        currentOccupancy: data.currentOccupancy,
+        capacity: data.capacity,
+        isOpen: data.isOpen,
+        businessHours: data.businessHours || prev.businessHours,
+        address: data.address !== undefined ? data.address : prev.address
+      } : null);
+      if (data.businessHours !== undefined) {
+        setBusinessHours(data.businessHours);
       }
+      if (data.address !== undefined) {
+        setAddress(data.address || '');
+      }
+      // Atualiza os dados de horários de pico silenciosamente em novas atualizações
+      fetchPeakData();
     });
 
     return () => {
@@ -295,7 +293,7 @@ export default function DashboardOwner() {
 
               <div className="occupancy-numbers">
                 <div className="occupancy-current">
-                  {gym?.isOpen ? gym?.currentOccupancy : 0}
+                  {gym?.currentOccupancy}
                 </div>
                 <div className="occupancy-limit">
                   Capacidade Limite: <strong>{gym?.capacity} alunos</strong>
@@ -323,14 +321,13 @@ export default function DashboardOwner() {
                   <button 
                     className="btn-control btn-in" 
                     onClick={() => simulateHardwareClick('in')} 
-                    disabled={!gym?.isOpen}
                   >
                     + Registrar Entrada
                   </button>
                   <button 
                     className="btn-control btn-out" 
                     onClick={() => simulateHardwareClick('out')}
-                    disabled={!gym?.isOpen || gym?.currentOccupancy === 0}
+                    disabled={gym?.currentOccupancy === 0}
                   >
                     - Registrar Saída
                   </button>
@@ -484,14 +481,14 @@ export default function DashboardOwner() {
                   <button 
                     className="btn-esp32" 
                     onClick={() => simulateHardwareClick('in')}
-                    disabled={simSending || !gym?.isOpen}
+                    disabled={simSending}
                   >
                     Entrada (PIN_12)
                   </button>
                   <button 
                     className="btn-esp32" 
                     onClick={() => simulateHardwareClick('out')}
-                    disabled={simSending || !gym?.isOpen || gym?.currentOccupancy === 0}
+                    disabled={simSending || gym?.currentOccupancy === 0}
                   >
                     Saída (PIN_14)
                   </button>
