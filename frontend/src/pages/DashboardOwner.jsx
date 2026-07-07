@@ -277,7 +277,7 @@ export default function DashboardOwner() {
 
               <div className="occupancy-numbers">
                 <div className="occupancy-current">
-                  {gym?.isOpen ? gym?.currentOccupancy : 0}
+                  {gym?.currentOccupancy}
                 </div>
                 <div className="occupancy-limit">
                   Capacidade Limite: <strong>{gym?.capacity} alunos</strong>
@@ -305,14 +305,13 @@ export default function DashboardOwner() {
                   <button 
                     className="btn-control btn-in" 
                     onClick={() => simulateHardwareClick('in')} 
-                    disabled={!gym?.isOpen}
                   >
                     + Registrar Entrada
                   </button>
                   <button 
                     className="btn-control btn-out" 
                     onClick={() => simulateHardwareClick('out')}
-                    disabled={!gym?.isOpen || gym?.currentOccupancy === 0}
+                    disabled={gym?.currentOccupancy === 0}
                   >
                     - Registrar Saída
                   </button>
@@ -466,14 +465,14 @@ export default function DashboardOwner() {
                   <button 
                     className="btn-esp32" 
                     onClick={() => simulateHardwareClick('in')}
-                    disabled={simSending || !gym?.isOpen}
+                    disabled={simSending}
                   >
                     Entrada (PIN_12)
                   </button>
                   <button 
                     className="btn-esp32" 
                     onClick={() => simulateHardwareClick('out')}
-                    disabled={simSending || !gym?.isOpen || gym?.currentOccupancy === 0}
+                    disabled={simSending || gym?.currentOccupancy === 0}
                   >
                     Saída (PIN_14)
                   </button>
