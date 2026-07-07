@@ -13,11 +13,11 @@ export function useRealtimeGym(filter, initialData) {
     setGym(initialData);
   }, [initialData]);
 
-  useEffect(() => {
-    const filterKey = Object.keys(filter)[0];
-    const filterValue = filter[filterKey];
+  const filterKey = filter ? Object.keys(filter)[0] : null;
+  const filterValue = filterKey ? filter[filterKey] : null;
 
-    if (!filterValue) return;
+  useEffect(() => {
+    if (!filterValue || !filterKey) return;
 
     // Cria o canal de escuta do Realtime para a tabela Gym
     const channel = supabase
