@@ -1,7 +1,15 @@
 {
-  "version": 2,
+  "buildCommand": "npm --prefix frontend install && npm --prefix frontend run build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "npm --prefix frontend install",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/server.js" },
-    { "source": "/(.*)", "destination": "/server.js" }
+    {
+      "source": "/api/:path*",
+      "destination": "https://SUA-URL-DO-BACKEND.com/api/:path*"
+    },
+    {
+      "source": "/((?!assets/|favicon.ico|index.html|painel.html).*)",
+      "destination": "/index.html"
+    }
   ]
 }
