@@ -1,493 +1,131 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GymFlow · Botoeira do Personal</title>
-  <meta name="description" content="Painel de controle manual de ocupação para personal trainers da GymFlow." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
-
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:        #0d0f14;
-      --surface:   #151820;
-      --border:    #252a35;
-      --text:      #e8eaf0;
-      --muted:     #6b7280;
-      --green:     #22c55e;
-      --green-dk:  #16a34a;
-      --red:       #ef4444;
-      --red-dk:    #dc2626;
-      --indigo:    #6366f1;
-      --indigo-dk: #4f46e5;
-      --amber:     #f59e0b;
-      --radius:    18px;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 1.25rem;
-      gap: 1rem;
-    }
-
-    /* ── CARD ── */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      width: 100%;
-      max-width: 420px;
-      padding: 1.75rem 1.5rem 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      box-shadow: 0 20px 60px rgba(0,0,0,.5);
-    }
-
-    /* ── HEADER ── */
-    .header { text-align: center; }
-    .logo {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      font-size: 1.4rem;
-      font-weight: 900;
-      letter-spacing: -0.5px;
-      color: var(--indigo);
-    }
-    .logo svg { width: 28px; height: 28px; }
-    .subtitle { font-size: .8rem; color: var(--muted); margin-top: .35rem; }
-
-    /* ── CONTADOR ── */
-    .counter-box {
-      background: #0d0f14;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.25rem 1rem;
-      text-align: center;
-    }
-    .counter-label {
-      font-size: .7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-      color: var(--muted);
-      margin-bottom: .5rem;
-    }
-    .counter-value {
-      font-size: 4.5rem;
-      font-weight: 900;
-      line-height: 1;
-      color: var(--green);
-      transition: transform .15s ease, color .3s;
-    }
-    .counter-value.pulse {
-      transform: scale(1.12);
-    }
-    .counter-value.red { color: var(--red); }
-    .counter-sub {
-      font-size: .78rem;
-      color: var(--muted);
-      margin-top: .5rem;
-    }
-    .counter-sub span { color: var(--text); font-weight: 600; }
-
-    /* ── BARRA DE OCUPAÇÃO ── */
-    .bar-track {
-      background: var(--border);
-      border-radius: 99px;
-      height: 8px;
-      overflow: hidden;
-      margin-top: .75rem;
-    }
-    .bar-fill {
-      height: 100%;
-      border-radius: 99px;
-      background: linear-gradient(90deg, var(--green), var(--amber));
-      transition: width .4s ease, background .4s;
-    }
-    .bar-fill.danger {
-      background: linear-gradient(90deg, var(--amber), var(--red));
-    }
-
-    /* ── BOTÕES +1 / -1 ── */
-    .btn-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    .btn {
-      border: none;
-      border-radius: 14px;
-      font-family: inherit;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      padding: 1.4rem 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .4rem;
-      transition: transform .12s ease, opacity .12s ease, box-shadow .2s;
-      position: relative;
-      overflow: hidden;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .btn:active { transform: scale(.93); opacity: .9; }
-    .btn .icon { font-size: 1.8rem; line-height: 1; }
-    .btn .label { font-size: .8rem; font-weight: 600; letter-spacing: .04em; }
-
-    .btn-out {
-      background: linear-gradient(135deg, #7f1d1d, var(--red-dk));
-      color: #fff;
-      box-shadow: 0 6px 24px rgba(239,68,68,.25);
-    }
-    .btn-out:hover { box-shadow: 0 8px 30px rgba(239,68,68,.4); }
-
-    .btn-in {
-      background: linear-gradient(135deg, #14532d, var(--green-dk));
-      color: #fff;
-      box-shadow: 0 6px 24px rgba(34,197,94,.25);
-    }
-    .btn-in:hover { box-shadow: 0 8px 30px rgba(34,197,94,.4); }
-
-    /* ── RIPPLE EFFECT ── */
-    .ripple {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255,255,255,.25);
-      transform: scale(0);
-      animation: ripple-anim .5s linear;
-      pointer-events: none;
-    }
-    @keyframes ripple-anim {
-      to { transform: scale(4); opacity: 0; }
-    }
-
-    /* ── SEÇÃO VALOR MANUAL ── */
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: .75rem;
-      color: var(--muted);
-      font-size: .72rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-    }
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .set-row {
-      display: flex;
-      gap: .75rem;
-    }
-    .set-input {
-      flex: 1;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: .75rem 1rem;
-      font-family: inherit;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--text);
-      text-align: center;
-      outline: none;
-      transition: border-color .2s;
-    }
-    .set-input::placeholder { color: var(--muted); font-weight: 400; }
-    .set-input:focus { border-color: var(--indigo); }
-    /* Remove setas do input number */
-    .set-input::-webkit-outer-spin-button,
-    .set-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-    .set-input[type=number] { -moz-appearance: textfield; }
-
-    .btn-set {
-      background: linear-gradient(135deg, #312e81, var(--indigo-dk));
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      padding: .75rem 1.25rem;
-      font-family: inherit;
-      font-weight: 700;
-      font-size: .85rem;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: transform .12s, box-shadow .2s;
-      box-shadow: 0 4px 16px rgba(99,102,241,.25);
-    }
-    .btn-set:hover { box-shadow: 0 6px 22px rgba(99,102,241,.45); }
-    .btn-set:active { transform: scale(.93); }
-
-    /* ── FEEDBACK ── */
-    .feedback {
-      text-align: center;
-      font-size: .8rem;
-      font-weight: 600;
-      min-height: 1.2em;
-      transition: opacity .3s;
-    }
-    .feedback.ok   { color: var(--green); }
-    .feedback.err  { color: var(--red); }
-    .feedback.hide { opacity: 0; }
-
-    /* ── STATUS BADGE ── */
-    .status-row {
-      display: flex;
-      justify-content: center;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: .4rem;
-      font-size: .72rem;
-      font-weight: 600;
-      padding: .35rem .8rem;
-      border-radius: 99px;
-      border: 1px solid;
-    }
-    .badge.open   { color: var(--green);  border-color: #166534; background: #052e16; }
-    .badge.closed { color: var(--red);    border-color: #7f1d1d; background: #1c0707; }
-    .badge .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-
-    /* ── LOADING SPINNER ── */
-    .spinner {
-      display: inline-block;
-      width: 18px; height: 18px;
-      border: 2px solid var(--border);
-      border-top-color: var(--indigo);
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GymFlow - Botoeira Virtual</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-4">
 
-<div class="card">
+  <div class="bg-gray-800 p-6 rounded-2xl shadow-lg w-full max-w-md text-center border border-gray-700">
+    <h1 class="text-2xl font-bold mb-2 text-indigo-400">GymFlow</h1>
+    <p class="text-gray-400 mb-6 text-sm">Painel de Controle Manual do Personal</p>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6.5 6.5h11M6.5 17.5h11M3 12h1m16 0h1M7 3l-4 9 4 9M17 3l4 9-4 9"/>
-      </svg>
-      GymFlow
+    <div class="mb-6 bg-gray-900 p-4 rounded-xl border border-gray-700">
+      <p class="text-xs uppercase tracking-wider text-gray-500">Alunos no Momento</p>
+      <span id="contador" class="text-5xl font-black text-green-400">0</span>
     </div>
-    <p class="subtitle">Botoeira Virtual do Personal Trainer</p>
-    <div class="status-row" style="margin-top:.75rem">
-      <span id="statusBadge" class="badge open">
-        <span class="dot"></span>
-        <span id="statusText">Carregando...</span>
-      </span>
+
+    <div class="grid grid-cols-2 gap-4 mb-6">
+      <button onclick="enviarAcao('out')" class="bg-red-600 hover:bg-red-700 active:scale-95 transition text-white font-bold py-6 px-4 rounded-xl text-xl shadow-md">
+        ➖ SAÍDA (-1)
+      </button>
+      <button onclick="enviarAcao('in')" class="bg-green-600 hover:bg-green-700 active:scale-95 transition text-white font-bold py-6 px-4 rounded-xl text-xl shadow-md">
+        ➕ ENTRADA (+1)
+      </button>
     </div>
-  </div>
 
-  <!-- CONTADOR -->
-  <div class="counter-box">
-    <p class="counter-label">Alunos presentes agora</p>
-    <div id="contador" class="counter-value">—</div>
-    <p class="counter-sub">de <span id="capacidade">—</span> vagas disponíveis</p>
-    <div class="bar-track">
-      <div id="barFill" class="bar-fill" style="width: 0%"></div>
+    <div class="flex gap-2 border-t border-gray-700 pt-4">
+      <input type="number" id="inputValor" placeholder="Ex: 10" class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 text-center text-lg">
+      <button onclick="definirValor()" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap">
+        Definir Fila
+      </button>
     </div>
+
+    <!-- Feedback visual amigável que substitui o alert() -->
+    <div id="statusMsg" class="hidden mt-4 p-2 rounded text-xs bg-indigo-900/50 text-indigo-300 border border-indigo-700/50 transition-all"></div>
   </div>
 
-  <!-- BOTÕES +1 / -1 -->
-  <div class="btn-grid">
-    <button id="btnSaida" class="btn btn-out" onclick="enviarAcao('out')">
-      <span class="icon">➖</span>
-      <span class="label">SAÍDA (-1)</span>
-    </button>
-    <button id="btnEntrada" class="btn btn-in" onclick="enviarAcao('in')">
-      <span class="icon">➕</span>
-      <span class="label">ENTRADA (+1)</span>
-    </button>
-  </div>
+  <script>
+    // URL Real da API de produção/desenvolvimento
+    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:5000/api/v1'
+      : '/api/v1';
+    
+    // Atualiza a tela inicialmente com os dados reais do banco
+    window.addEventListener('DOMContentLoaded', carregarOcupacao);
 
-  <!-- FEEDBACK -->
-  <p id="feedback" class="feedback hide">‎</p>
-
-  <!-- VALOR MANUAL -->
-  <div class="divider">ou definir valor exato</div>
-
-  <div class="set-row">
-    <input
-      id="inputValor"
-      type="number"
-      class="set-input"
-      placeholder="Ex: 15"
-      min="0"
-      max="9999"
-    />
-    <button class="btn-set" onclick="definirValor()">Definir</button>
-  </div>
-
-</div>
-
-<script>
-  // ──────────────────────────────────────────────
-  //  CONFIGURAÇÃO: troque pela URL real da Vercel
-  // ──────────────────────────────────────────────
-  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:5000/api/v1'
-    : '/api/v1';                 // em produção usa a URL relativa do mesmo domínio
-
-  // ── ESTADO LOCAL ──────────────────────────────
-  let capacidadeAtual = 0;
-  let loading = false;
-
-  // ── INICIALIZAÇÃO ────────────────────────────
-  window.addEventListener('DOMContentLoaded', carregarOcupacao);
-
-  // ── CARREGAR DADOS INICIAIS ───────────────────
-  async function carregarOcupacao() {
-    try {
-      const res  = await fetch(`${API_BASE}/web/ocupacao`);
-      const data = await res.json();
-      if (res.ok) {
-        capacidadeAtual = data.capacity || 0;
-        atualizarUI(data.currentOccupancy, data.capacity, data.isOpen);
-      } else {
-        mostrarFeedback('Erro ao carregar dados.', 'err');
+    async function carregarOcupacao() {
+      try {
+        const res = await fetch(`${API_BASE}/web/ocupacao`);
+        if (res.ok) {
+          const dados = await res.json();
+          const total = dados.currentOccupancy !== undefined ? dados.currentOccupancy : (dados.total_presentes || 0);
+          document.getElementById('contador').innerText = total;
+        } else {
+          mostrarMensagem('Erro ao carregar dados do servidor.');
+        }
+      } catch (err) {
+        mostrarMensagem('Erro de rede ao carregar dados.');
       }
-    } catch {
-      mostrarFeedback('Servidor inacessível.', 'err');
     }
-  }
 
-  // ── ENVIAR AÇÃO +1 / -1 ───────────────────────
-  async function enviarAcao(tipo) {
-    if (loading) return;
-    setLoading(true);
-    try {
-      const res  = await fetch(`${API_BASE}/web/update`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ action: tipo })
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        atualizarUI(data.currentOccupancy, data.capacity ?? capacidadeAtual);
-        mostrarFeedback(tipo === 'in' ? '✅ Entrada registrada!' : '✅ Saída registrada!', 'ok');
-      } else {
-        mostrarFeedback(data.error || 'Erro ao atualizar.', 'err');
+    // Função para mostrar notificações na interface sem usar alert()
+    function mostrarMensagem(texto) {
+      const msgBox = document.getElementById('statusMsg');
+      msgBox.innerText = texto;
+      msgBox.classList.remove('hidden');
+      setTimeout(() => {
+        msgBox.classList.add('hidden');
+      }, 2500);
+    }
+
+    // Atualiza a ação enviando para a API real
+    async function enviarAcao(tipo) {
+      try {
+        const res = await fetch(`${API_BASE}/web/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: tipo })
+        });
+        const dados = await res.json();
+        if (res.ok && dados.success) {
+          const total = dados.total_presentes !== undefined ? dados.total_presentes : dados.currentOccupancy;
+          document.getElementById('contador').innerText = total;
+          mostrarMensagem(`Ação registrada: ${tipo === 'in' ? 'Entrada' : 'Saída'}`);
+        } else {
+          mostrarMensagem(dados.error || 'Erro ao atualizar.');
+        }
+      } catch (err) { 
+        mostrarMensagem('Erro ao atualizar banco.'); 
       }
-    } catch {
-      mostrarFeedback('Falha na conexão com o servidor.', 'err');
     }
-    setLoading(false);
-  }
 
-  // ── DEFINIR VALOR EXATO ───────────────────────
-  async function definirValor() {
-    const input = document.getElementById('inputValor');
-    const valor = input.value.trim();
-    if (valor === '') return mostrarFeedback('Digite um número válido.', 'err');
-    if (loading) return;
-    setLoading(true);
-    try {
-      const res  = await fetch(`${API_BASE}/web/set-value`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ valor: parseInt(valor, 10) })
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        atualizarUI(data.currentOccupancy, data.capacity ?? capacidadeAtual);
-        mostrarFeedback(`✅ Fila definida para ${data.currentOccupancy} alunos.`, 'ok');
-        input.value = '';
-      } else {
-        mostrarFeedback(data.error || 'Erro ao definir valor.', 'err');
+    // Define um valor fixo enviando para a API real
+    async function definirValor() {
+      const input = document.getElementById('inputValor');
+      const valor = input.value;
+      if (valor === "" || isNaN(valor)) {
+        mostrarMensagem("Por favor, insira um número válido.");
+        return;
       }
-    } catch {
-      mostrarFeedback('Falha na conexão com o servidor.', 'err');
+      
+      try {
+        const novoValor = parseInt(valor);
+        if (novoValor < 0) {
+          mostrarMensagem("O total de alunos não pode ser negativo.");
+          return;
+        }
+
+        const res = await fetch(`${API_BASE}/web/set-value`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ valor: novoValor })
+        });
+        const dados = await res.json();
+        if (res.ok && dados.success) {
+          const total = dados.total_presentes !== undefined ? dados.total_presentes : dados.currentOccupancy;
+          document.getElementById('contador').innerText = total;
+          input.value = ""; // Limpa o input
+          mostrarMensagem(`Fila redefinida para ${total}`);
+        } else {
+          mostrarMensagem(dados.error || 'Erro ao definir valor.');
+        }
+      } catch (err) { 
+        mostrarMensagem('Erro ao definir valor.'); 
+      }
     }
-    setLoading(false);
-  }
-
-  // ── ATUALIZAR INTERFACE ───────────────────────
-  function atualizarUI(ocupacao, capacidade, isOpen) {
-    const el   = document.getElementById('contador');
-    const bar  = document.getElementById('barFill');
-    const cap  = document.getElementById('capacidade');
-    const badge = document.getElementById('statusBadge');
-    const statusText = document.getElementById('statusText');
-
-    capacidadeAtual = capacidade ?? capacidadeAtual;
-    const pct = capacidadeAtual > 0 ? Math.min(100, (ocupacao / capacidadeAtual) * 100) : 0;
-
-    // Contador com animação de pulso
-    el.textContent = ocupacao;
-    el.classList.toggle('red', pct >= 90);
-    el.classList.add('pulse');
-    setTimeout(() => el.classList.remove('pulse'), 200);
-
-    // Barra de progresso
-    bar.style.width = pct + '%';
-    bar.classList.toggle('danger', pct >= 75);
-
-    // Capacidade
-    cap.textContent = capacidadeAtual;
-
-    // Badge de status (só atualiza se o dado vier do servidor)
-    if (isOpen !== undefined) {
-      badge.className = 'badge ' + (isOpen ? 'open' : 'closed');
-      statusText.textContent = isOpen ? 'Academia aberta' : 'Academia fechada';
-    }
-  }
-
-  // ── FEEDBACK TEMPORÁRIO ───────────────────────
-  let feedbackTimer;
-  function mostrarFeedback(msg, tipo) {
-    const el = document.getElementById('feedback');
-    el.textContent = msg;
-    el.className   = `feedback ${tipo}`;
-    clearTimeout(feedbackTimer);
-    feedbackTimer  = setTimeout(() => el.className = 'feedback hide', 3500);
-  }
-
-  // ── LOADING STATE ─────────────────────────────
-  function setLoading(state) {
-    loading = state;
-    document.getElementById('btnEntrada').disabled = state;
-    document.getElementById('btnSaida').disabled   = state;
-    document.querySelector('.btn-set').disabled     = state;
-  }
-
-  // ── RIPPLE NOS BOTÕES ─────────────────────────
-  document.querySelectorAll('.btn').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-      const r  = document.createElement('span');
-      const d  = Math.max(btn.clientWidth, btn.clientHeight);
-      const rect = btn.getBoundingClientRect();
-      r.className = 'ripple';
-      r.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - rect.left - d/2}px;top:${e.clientY - rect.top - d/2}px`;
-      btn.appendChild(r);
-      r.addEventListener('animationend', () => r.remove());
-    });
-  });
-
-  // ── SUBMIT COM ENTER NO INPUT ─────────────────
-  document.getElementById('inputValor').addEventListener('keydown', e => {
-    if (e.key === 'Enter') definirValor();
-  });
-</script>
-
+  </script>
 </body>
 </html>

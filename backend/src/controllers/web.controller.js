@@ -1,49 +1,41 @@
 const { prisma } = require('../services/prisma.service');
+const { createClient } = require('@supabase/supabase-js');
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY
+);
 
 /**
  * Incrementa (+1) ou decrementa (-1) a ocupação atual via Botoeira Virtual Web.
  * Body: { action: 'in' | 'out' }
  */
 async function webUpdateOccupancy(req, res) {
-  const { action } = req.body;
-
-  if (!['in', 'out'].includes(action)) {
-    return res.status(400).json({ error: 'Ação inválida. Use "in" ou "out".' });
-  }
+  const { action } = req.body; // 'in' ou 'out'
 
   try {
-    const gym = await prisma.gym.findFirst();
+    const { data: registro, error: fetchError } = await supabase
+      .from('ocupacao_academia')
+      .select('total_presentes')
+      .eq('id', 1)
+      .single();
 
-    if (!gym) {
-      return res.status(500).json({ error: 'Nenhuma academia cadastrada no sistema.' });
-    }
+    if (fetchError) throw fetchError;
 
-    let novaOcupacao = gym.currentOccupancy;
+    let novoTotal = registro.total_presentes;
+    if (action === 'in') novoTotal += 1;
+    if (action === 'out') novoTotal = Math.max(0, novoTotal - 1);
 
-    if (action === 'in') {
-      novaOcupacao = Math.min(gym.capacity, gym.currentOccupancy + 1);
-    } else if (action === 'out') {
-      novaOcupacao = Math.max(0, gym.currentOccupancy - 1);
-    }
+    const { error: updateError } = await supabase
+      .from('ocupacao_academia')
+      .update({ total_presentes: novoTotal, ultima_atualizacao: new Date() })
+      .eq('id', 1);
 
-    const gymAtualizada = await prisma.gym.update({
-      where: { id: gym.id },
-      data: { currentOccupancy: novaOcupacao }
-    });
+    if (updateError) throw updateError;
 
-    // Registra o log para estatísticas de horários de pico
-    await prisma.occupancyLog.create({
-      data: { occupancy: novaOcupacao }
-    });
-
-    return res.status(200).json({
-      success: true,
-      currentOccupancy: novaOcupacao,
-      capacity: gymAtualizada.capacity
-    });
+    return res.json({ success: true, total_presentes: novoTotal });
   } catch (error) {
-    console.error('Erro ao atualizar ocupação via painel web:', error);
-    return res.status(500).json({ error: 'Erro interno ao atualizar ocupação.' });
+    return res.status(500).json({ error: error.message });
   }
 }
 
@@ -52,46 +44,20 @@ async function webUpdateOccupancy(req, res) {
  * Body: { valor: number }
  */
 async function webSetOccupancy(req, res) {
-  const { valor } = req.body;
+  const { valor } = req.body; // Número exato ex: 12
 
-  if (valor === undefined || valor === null) {
-    return res.status(400).json({ error: 'Campo "valor" é obrigatório.' });
-  }
-
-  const novaOcupacao = parseInt(valor, 10);
-
-  if (isNaN(novaOcupacao) || novaOcupacao < 0) {
-    return res.status(400).json({ error: 'Valor inválido. Deve ser um número inteiro não negativo.' });
-  }
+  if (valor < 0) return res.status(400).json({ error: "Valor não pode ser negativo" });
 
   try {
-    const gym = await prisma.gym.findFirst();
+    const { error } = await supabase
+      .from('ocupacao_academia')
+      .update({ total_presentes: valor, ultima_atualizacao: new Date() })
+      .eq('id', 1);
 
-    if (!gym) {
-      return res.status(500).json({ error: 'Nenhuma academia cadastrada no sistema.' });
-    }
-
-    // Garante que o valor não ultrapassa a capacidade máxima
-    const ocupacaoFinal = Math.min(novaOcupacao, gym.capacity);
-
-    const gymAtualizada = await prisma.gym.update({
-      where: { id: gym.id },
-      data: { currentOccupancy: ocupacaoFinal }
-    });
-
-    // Registra o log para estatísticas de horários de pico
-    await prisma.occupancyLog.create({
-      data: { occupancy: ocupacaoFinal }
-    });
-
-    return res.status(200).json({
-      success: true,
-      currentOccupancy: ocupacaoFinal,
-      capacity: gymAtualizada.capacity
-    });
+    if (error) throw error;
+    return res.json({ success: true, total_presentes: valor });
   } catch (error) {
-    console.error('Erro ao definir ocupação via painel web:', error);
-    return res.status(500).json({ error: 'Erro interno ao definir ocupação.' });
+    return res.status(500).json({ error: error.message });
   }
 }
 

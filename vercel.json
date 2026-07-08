@@ -1,11 +1,12 @@
 {
+  "version": 2,
   "buildCommand": "npm --prefix frontend install && npm --prefix frontend run build",
   "outputDirectory": "frontend/dist",
   "installCommand": "npm --prefix frontend install",
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://SUA-URL-DO-BACKEND.com/api/:path*"
+      "destination": "https://gym-flow1-b2ci.vercel.app/api/:path*"
     },
     {
       "source": "/((?!assets/|favicon.ico|index.html|painel.html).*)",
