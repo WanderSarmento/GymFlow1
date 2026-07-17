@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GymFlow - Botoeira Virtual</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/src/styles/global.css">
 </head>
 <body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-4">
 
@@ -18,17 +18,17 @@
     </div>
 
     <div class="grid grid-cols-2 gap-4 mb-6">
-      <button onclick="enviarAcao('out')" class="bg-red-600 hover:bg-red-700 active:scale-95 transition text-white font-bold py-6 px-4 rounded-xl text-xl shadow-md">
+      <button id="btn-out" class="bg-red-600 hover:bg-red-700 active:scale-95 transition text-white font-bold py-6 px-4 rounded-xl text-xl shadow-md">
         ➖ SAÍDA (-1)
       </button>
-      <button onclick="enviarAcao('in')" class="bg-green-600 hover:bg-green-700 active:scale-95 transition text-white font-bold py-6 px-4 rounded-xl text-xl shadow-md">
+      <button id="btn-in" class="bg-green-600 hover:bg-green-700 active:scale-95 transition text-white font-bold py-6 px-4 rounded-xl text-xl shadow-md">
         ➕ ENTRADA (+1)
       </button>
     </div>
 
     <div class="flex gap-2 border-t border-gray-700 pt-4">
       <input type="number" id="inputValor" placeholder="Ex: 10" class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 text-center text-lg">
-      <button onclick="definirValor()" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap">
+      <button id="btn-set" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap">
         Definir Fila
       </button>
     </div>
@@ -37,95 +37,6 @@
     <div id="statusMsg" class="hidden mt-4 p-2 rounded text-xs bg-indigo-900/50 text-indigo-300 border border-indigo-700/50 transition-all"></div>
   </div>
 
-  <script>
-    // URL Real da API de produção/desenvolvimento
-    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://localhost:5000/api/v1'
-      : '/api/v1';
-    
-    // Atualiza a tela inicialmente com os dados reais do banco
-    window.addEventListener('DOMContentLoaded', carregarOcupacao);
-
-    async function carregarOcupacao() {
-      try {
-        const res = await fetch(`${API_BASE}/web/ocupacao`);
-        if (res.ok) {
-          const dados = await res.json();
-          const total = dados.currentOccupancy !== undefined ? dados.currentOccupancy : (dados.total_presentes || 0);
-          document.getElementById('contador').innerText = total;
-        } else {
-          mostrarMensagem('Erro ao carregar dados do servidor.');
-        }
-      } catch (err) {
-        mostrarMensagem('Erro de rede ao carregar dados.');
-      }
-    }
-
-    // Função para mostrar notificações na interface sem usar alert()
-    function mostrarMensagem(texto) {
-      const msgBox = document.getElementById('statusMsg');
-      msgBox.innerText = texto;
-      msgBox.classList.remove('hidden');
-      setTimeout(() => {
-        msgBox.classList.add('hidden');
-      }, 2500);
-    }
-
-    // Atualiza a ação enviando para a API real
-    async function enviarAcao(tipo) {
-      try {
-        const res = await fetch(`${API_BASE}/web/update`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: tipo })
-        });
-        const dados = await res.json();
-        if (res.ok && dados.success) {
-          const total = dados.total_presentes !== undefined ? dados.total_presentes : dados.currentOccupancy;
-          document.getElementById('contador').innerText = total;
-          mostrarMensagem(`Ação registrada: ${tipo === 'in' ? 'Entrada' : 'Saída'}`);
-        } else {
-          mostrarMensagem(dados.error || 'Erro ao atualizar.');
-        }
-      } catch (err) { 
-        mostrarMensagem('Erro ao atualizar banco.'); 
-      }
-    }
-
-    // Define um valor fixo enviando para a API real
-    async function definirValor() {
-      const input = document.getElementById('inputValor');
-      const valor = input.value;
-      if (valor === "" || isNaN(valor)) {
-        mostrarMensagem("Por favor, insira um número válido.");
-        return;
-      }
-      
-      try {
-        const novoValor = parseInt(valor);
-        if (novoValor < 0) {
-          mostrarMensagem("O total de alunos não pode ser negativo.");
-          return;
-        }
-
-        const res = await fetch(`${API_BASE}/web/set-value`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ valor: novoValor })
-        });
-        const dados = await res.json();
-        if (res.ok && dados.success) {
-          const total = dados.total_presentes !== undefined ? dados.total_presentes : dados.currentOccupancy;
-          document.getElementById('contador').innerText = total;
-          input.value = ""; // Limpa o input
-          mostrarMensagem(`Fila redefinida para ${total}`);
-        } else {
-          mostrarMensagem(dados.error || 'Erro ao definir valor.');
-        }
-      } catch (err) { 
-        mostrarMensagem('Erro ao definir valor.'); 
-      }
-    }
-  </script>
+  <script type="module" src="/src/painel.js"></script>
 </body>
 </html>
